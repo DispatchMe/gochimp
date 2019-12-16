@@ -82,7 +82,7 @@ const testTemplateName string = "test_transactional_template"
 func TestTemplateAdd(t *testing.T) {
 	// delete the test template if it exists already
 	mandrill.TemplateDelete(testTemplateName)
-	template, err := mandrill.TemplateAdd(testTemplateName, readTemplate("templates/transactional_basic.html"), true)
+	template, err := mandrill.TemplateAdd(testTemplateName, readTemplate("templates/transactional_basic.html"), "", true)
 	if err != nil {
 		t.Errorf("Error: %v", err)
 	}
@@ -90,14 +90,14 @@ func TestTemplateAdd(t *testing.T) {
 		t.Errorf("Wrong template name, expecting %s, got %s", testTemplateName, template.Name)
 	}
 	// try recreating, should error out
-	template, err = mandrill.TemplateAdd(testTemplateName, readTemplate("templates/transactional_basic.html"), true)
+	template, err = mandrill.TemplateAdd(testTemplateName, readTemplate("templates/transactional_basic.html"), "", true)
 	if err == nil {
 		t.Error("Should have error'd on duplicate template")
 	}
 }
 
 func TestTemplateList(t *testing.T) {
-	_, err := mandrill.TemplateAdd("listTest", "testing 123", true)
+	_, err := mandrill.TemplateAdd("listTest", "testing 123", "", true)
 	if err != nil {
 		t.Errorf("Error: %v", err)
 	}
@@ -123,8 +123,8 @@ func TestTemplateInfo(t *testing.T) {
 
 func TestTemplateUpdate(t *testing.T) {
 	// add a simple template
-	template, err := mandrill.TemplateAdd("updateTest", "testing 123", true)
-	template, err = mandrill.TemplateUpdate("updateTest", "testing 321", true)
+	template, err := mandrill.TemplateAdd("updateTest", "testing 123", "test subject 123", true)
+	template, err = mandrill.TemplateUpdate("updateTest", "testing 321", "test subject 321", true)
 	if err != nil {
 		t.Errorf("Error:%v", err)
 	}
@@ -134,6 +134,9 @@ func TestTemplateUpdate(t *testing.T) {
 	if template.Code != "testing 321" {
 		t.Errorf("Wrong template code, expecting %s, got %s", "testing 321", template.Code)
 	}
+	if template.Subject != "test subject 321" {
+		t.Errorf("Wrong template code, expecting %s, got %s", "subject 321", template.Subject)
+	}
 	// be nice and tear down after test
 	mandrill.TemplateDelete("updateTest")
 }
@@ -141,7 +144,7 @@ func TestTemplateUpdate(t *testing.T) {
 func TestTemplatePublish(t *testing.T) {
 	mandrill.TemplateDelete("publishTest")
 	// add a simple template
-	template, err := mandrill.TemplateAdd("publishTest", "testing 123", false)
+	template, err := mandrill.TemplateAdd("publishTest", "testing 123", "", false)
 	if err != nil {
 		t.Errorf("Error:%v", err)
 	}
@@ -167,7 +170,7 @@ func TestTemplatePublish(t *testing.T) {
 func TestTemplateRender(t *testing.T) {
 	//make sure it's freshly added
 	mandrill.TemplateDelete("renderTest")
-	mandrill.TemplateAdd("renderTest", "*|MC:SUBJECT|*", true)
+	mandrill.TemplateAdd("renderTest", "*|MC:SUBJECT|*", "", true)
 	//weak - should check results
 	mergeVars := []Var{*NewVar("SUBJECT", "Hello, welcome")}
 	result, err := mandrill.TemplateRender("renderTest", nil, mergeVars)
@@ -182,7 +185,7 @@ func TestTemplateRender(t *testing.T) {
 func TestTemplateRender2(t *testing.T) {
 	//make sure it's freshly added
 	mandrill.TemplateDelete("renderTest")
-	mandrill.TemplateAdd("renderTest", "<div mc:edit=\"std_content00\"></div>", true)
+	mandrill.TemplateAdd("renderTest", "<div mc:edit=\"std_content00\"></div>", "", true)
 	//weak - should check results
 	templateContent := []Var{*NewVar("std_content00", "Hello, welcome")}
 	result, err := mandrill.TemplateRender("renderTest", templateContent, nil)
@@ -197,7 +200,7 @@ func TestTemplateRender2(t *testing.T) {
 func TestMessageTemplateSend(t *testing.T) {
 	//make sure it's freshly added
 	mandrill.TemplateDelete(testTemplateName)
-	mandrill.TemplateAdd(testTemplateName, readTemplate("templates/transactional_basic.html"), true)
+	mandrill.TemplateAdd(testTemplateName, readTemplate("templates/transactional_basic.html"), "", true)
 	//weak - should check results
 	templateContent := []Var{*NewVar("std_content00", "Hello, welcome")}
 	mergeVars := []Var{*NewVar("SUBJECT", "Hello, welcome")}

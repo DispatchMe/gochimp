@@ -26,7 +26,7 @@ Getting Started
 Below is an example approach to rendering custom content into a Mandrill
 template called "welcome email" and sending the rendered email.
 
-```
+```go
 package main
 
 import (
@@ -44,10 +44,11 @@ func main() {
 	}
 
 	templateName := "welcome email"
+	templateSubject := "Welcome!"
 	contentVar := gochimp.Var{"main", "<h1>Welcome aboard!</h1>"}
 	content := []gochimp.Var{contentVar}
 
-	_, err = mandrillApi.TemplateAdd(templateName, fmt.Sprintf("%s", contentVar.Content), true)
+	_, err = mandrillApi.TemplateAdd(templateName, fmt.Sprintf("%s", contentVar.Content), templateSubject, true)
 	if err != nil {
 		fmt.Println("Error adding template: %v", err)
 		return
